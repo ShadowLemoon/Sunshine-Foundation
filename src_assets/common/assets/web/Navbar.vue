@@ -55,8 +55,7 @@ import ThemeToggle from './ThemeToggle.vue'
 // 背景处理逻辑
 const loadBackground = () => {
   const savedBg =
-    localStorage.getItem('customBackground') ??
-    'https://raw.gitmirror.com/qiin2333/qiin.github.io/assets/img/sunshine-bg0.webp'
+    localStorage.getItem('customBackground')
   if (savedBg) {
     document.body.style.background = `url(${savedBg}) center/cover fixed no-repeat`
   }
