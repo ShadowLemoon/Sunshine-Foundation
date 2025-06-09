@@ -198,14 +198,14 @@ namespace system_tray {
     { .text = "Open Sunshine", .cb = tray_open_ui_cb },
     { .text = "-" },
     { .text = "VDD Monitor Toggle", .checked = 0, .cb = tray_toggle_display_cb },
-    { .text = "-" },
-    { .text = "Star Project", .cb = tray_star_project_cb },
-    { .text = "Help Us",
-      .submenu =
-        (struct tray_menu[]) {
-          { .text = "Doctor", .cb = tray_donate_doctor_cb },
-          { .text = "Qiin", .cb = tray_donate_qiin_cb },
-          { .text = nullptr } } },
+    // { .text = "-" },
+    // { .text = "Star Project", .cb = tray_star_project_cb },
+    // { .text = "Help Us",
+    //   .submenu =
+    //     (struct tray_menu[]) {
+    //       { .text = "Doctor", .cb = tray_donate_doctor_cb },
+    //       { .text = "Qiin", .cb = tray_donate_qiin_cb },
+    //       { .text = nullptr } } },
     { .text = "-" },
   #ifdef _WIN32
     { .text = "Reset Display Device Config", .cb = tray_reset_display_device_config_cb },
