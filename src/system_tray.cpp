@@ -87,10 +87,6 @@ namespace system_tray {
   static std::string s_chinese;
   static std::string s_english;
   static std::string s_japanese;
-  static std::string s_star_project;
-  static std::string s_help_us;
-  static std::string s_developer_yundi339;
-  static std::string s_developer_qiin;
   static std::string s_reset_display_device_config;
   static std::string s_restart;
   static std::string s_quit;
@@ -108,10 +104,6 @@ namespace system_tray {
     s_chinese = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_CHINESE);
     s_english = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_ENGLISH);
     s_japanese = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_JAPANESE);
-    s_star_project = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_STAR_PROJECT);
-    s_help_us = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_HELP_US);
-    s_developer_yundi339 = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_DEVELOPER_YUNDI339);
-    s_developer_qiin = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_DEVELOPER_QIIN);
     s_reset_display_device_config = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_RESET_DISPLAY_DEVICE_CONFIG);
     s_restart = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_RESTART);
     s_quit = system_tray_i18n::get_localized_string(system_tray_i18n::KEY_QUIT);
@@ -131,17 +123,13 @@ namespace system_tray {
     tray_menus[6].submenu[0].text = s_chinese.c_str();
     tray_menus[6].submenu[1].text = s_english.c_str();
     tray_menus[6].submenu[2].text = s_japanese.c_str();
-    tray_menus[8].text = s_star_project.c_str();
-    tray_menus[9].text = s_help_us.c_str();
-    tray_menus[9].submenu[0].text = s_developer_yundi339.c_str();
-    tray_menus[9].submenu[1].text = s_developer_qiin.c_str();
   #ifdef _WIN32
-    tray_menus[11].text = s_reset_display_device_config.c_str();
-    tray_menus[12].text = s_restart.c_str();
-    tray_menus[13].text = s_quit.c_str();
+    tray_menus[8].text = s_reset_display_device_config.c_str();
+    tray_menus[9].text = s_restart.c_str();
+    tray_menus[10].text = s_quit.c_str();
   #else
-    tray_menus[11].text = s_restart.c_str();
-    tray_menus[12].text = s_quit.c_str();
+    tray_menus[8].text = s_restart.c_str();
+    tray_menus[9].text = s_quit.c_str();
   #endif
   }
 
@@ -659,14 +647,6 @@ namespace system_tray {
           { .text = "中文", .cb = tray_language_chinese_cb },
           { .text = "English", .cb = tray_language_english_cb },
           { .text = "日本語", .cb = tray_language_japanese_cb },
-          { .text = nullptr } } },
-    { .text = "-" },
-    { .text = "Star Project", .cb = tray_star_project_cb },
-    { .text = "Help Us",
-      .submenu =
-        (struct tray_menu[]) {
-          { .text = "Developer: Yundi339", .cb = tray_donate_yundi339_cb },
-          { .text = "Developer: Qiin", .cb = tray_donate_qiin_cb },
           { .text = nullptr } } },
     { .text = "-" },
   #ifdef _WIN32

@@ -32,8 +32,10 @@ export function useBackground(options = {}) {
    * 加载背景图片
    */
   const loadBackground = () => {
-    const savedBg = localStorage.getItem(storageKey) ?? defaultBackground
-    setBackground(savedBg)
+    const savedBg = localStorage.getItem(storageKey)
+    if (savedBg) {
+      setBackground(savedBg)
+    }
   }
 
   /**

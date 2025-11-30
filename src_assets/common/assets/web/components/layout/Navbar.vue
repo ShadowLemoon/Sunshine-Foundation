@@ -125,15 +125,6 @@ onUnmounted(() => {
   opacity: 0.5;
 }
 
-body {
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: #5496dd;
-  background-size: cover;
-  background-attachment: fixed;
-  transition: background 0.3s ease;
-}
-
 [data-bs-theme='light'] {
   --bs-body-bg: rgba(255, 255, 255, 0.41);
   --bs-dropdown-bg: rgba(255, 255, 255, 0.7);
