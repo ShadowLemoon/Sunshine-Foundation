@@ -47,6 +47,10 @@
 #include "system_tray.h"
 #include "version.h"
 
+#if defined(_WIN32)
+  #include "platform/windows/win_dark_mode.h"
+#endif
+
 // Rust tray API
 #include "rust_tray/include/rust_tray.h"
 
@@ -178,6 +182,13 @@ namespace system_tray {
       BOOST_LOG(warning) << "Tray already initialized"sv;
       return 0;
     }
+
+#if defined(_WIN32)
+    // Enable dark mode for the entire process BEFORE creating the tray
+    // This affects all menus, dialogs, and windows
+    win_dark_mode::enable_process_dark_mode();
+    BOOST_LOG(debug) << "Dark mode enabled for process"sv;
+#endif
 
     // Get locale from config
     std::string locale = "zh";  // Default to Chinese

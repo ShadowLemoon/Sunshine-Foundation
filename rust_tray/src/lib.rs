@@ -624,9 +624,9 @@ pub unsafe extern "C" fn tray_init_ex(
     // Register callback
     register_callback(callback);
     
-    // Enable dark mode for context menus (follow system setting)
-    // This must be called before creating the menu
-    dark_mode::enable_dark_mode();
+    // NOTE: Dark mode is now handled by C++ (win_dark_mode::enable_process_dark_mode)
+    // which must be called BEFORE tray_init_ex. The Rust tray will automatically
+    // follow the process's dark mode setting without needing to manage it here.
     
     // Initialize global state
     let _ = TRAY_STATE.get_or_init(|| Mutex::new(None));
@@ -902,27 +902,38 @@ pub unsafe extern "C" fn tray_show_notification(
 }
 
 // ============================================================================
-// Dark Mode API
+// Dark Mode API (DEPRECATED - now handled by C++)
 // ============================================================================
 
-/// Enable dark mode for context menus (follow system setting)
+/// Enable dark mode for context menus (DEPRECATED)
 /// 
-/// Call this before creating menus. The menu will automatically
-/// follow the system's dark/light mode setting.
+/// This function is now a no-op. Dark mode should be enabled in C++ using
+/// win_dark_mode::enable_process_dark_mode() BEFORE calling tray_init_ex().
+/// 
+/// The function is kept for backward compatibility but does nothing.
 #[no_mangle]
 pub extern "C" fn tray_enable_dark_mode() {
+    // No-op: Dark mode is now handled by C++ at the process level
     dark_mode::enable_dark_mode();
 }
 
-/// Force dark mode for context menus
+/// Force dark mode for context menus (DEPRECATED)
+/// 
+/// This function is now a no-op. Dark mode should be controlled in C++.
+/// The function is kept for backward compatibility but does nothing.
 #[no_mangle]
 pub extern "C" fn tray_force_dark_mode() {
+    // No-op: Dark mode is now handled by C++ at the process level
     dark_mode::force_dark_mode();
 }
 
-/// Force light mode for context menus
+/// Force light mode for context menus (DEPRECATED)
+/// 
+/// This function is now a no-op. Dark mode should be controlled in C++.
+/// The function is kept for backward compatibility but does nothing.
 #[no_mangle]
 pub extern "C" fn tray_force_light_mode() {
+    // No-op: Dark mode is now handled by C++ at the process level
     dark_mode::force_light_mode();
 }
 
