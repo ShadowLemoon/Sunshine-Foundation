@@ -914,7 +914,6 @@ pub unsafe extern "C" fn tray_show_notification(
 #[no_mangle]
 pub extern "C" fn tray_enable_dark_mode() {
     // No-op: Dark mode is now handled by C++ at the process level
-    dark_mode::enable_dark_mode();
 }
 
 /// Force dark mode for context menus (DEPRECATED)
@@ -924,7 +923,6 @@ pub extern "C" fn tray_enable_dark_mode() {
 #[no_mangle]
 pub extern "C" fn tray_force_dark_mode() {
     // No-op: Dark mode is now handled by C++ at the process level
-    dark_mode::force_dark_mode();
 }
 
 /// Force light mode for context menus (DEPRECATED)
@@ -934,7 +932,6 @@ pub extern "C" fn tray_force_dark_mode() {
 #[no_mangle]
 pub extern "C" fn tray_force_light_mode() {
     // No-op: Dark mode is now handled by C++ at the process level
-    dark_mode::force_light_mode();
 }
 
 // ============================================================================

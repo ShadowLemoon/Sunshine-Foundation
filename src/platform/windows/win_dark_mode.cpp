@@ -52,14 +52,17 @@ namespace win_dark_mode {
     }
 
     // Try to get SetPreferredAppMode (Windows 10 1903+)
-    // This is ordinal 135 but we'll try by name first (undocumented but more stable)
-    // If that fails, we fall back to the older AllowDarkModeForApp
+    // Both SetPreferredAppMode and AllowDarkModeForApp use ordinal 135,
+    // but they have different signatures depending on Windows version:
+    // - Win10 1903+: SetPreferredAppMode(PreferredAppMode) -> PreferredAppMode
+    // - Win10 1809-1903: AllowDarkModeForApp(BOOL) -> BOOL
+    // We try SetPreferredAppMode first with the newer signature
     g_SetPreferredAppMode =
       reinterpret_cast<SetPreferredAppModeFn>(
         GetProcAddress(hUxTheme, MAKEINTRESOURCEA(135)));
 
-    // If SetPreferredAppMode is not available, try AllowDarkModeForApp (Windows 10 1809-1903)
-    // This is ordinal 135 on older versions, but the signature is different
+    // If SetPreferredAppMode signature doesn't match (older Windows),
+    // try AllowDarkModeForApp with BOOL signature using the same ordinal
     if (!g_SetPreferredAppMode) {
       g_AllowDarkModeForApp =
         reinterpret_cast<AllowDarkModeForAppFn>(
