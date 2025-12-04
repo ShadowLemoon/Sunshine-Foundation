@@ -22,6 +22,10 @@
 #include "upnp.h"
 #include "video.h"
 
+#ifdef _WIN32
+  #include "platform/windows/win_dark_mode.h"
+#endif
+
 extern "C" {
 #include "rswrapper.h"
 }
@@ -124,6 +128,10 @@ int main(int argc, char *argv[]) {
   // Avoid searching the PATH in case a user has configured their system insecurely
   // by placing a user-writable directory in the system-wide PATH variable.
   SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_APPLICATION_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32);
+
+  // Enable dark mode for the entire process before creating any windows
+  // This must be called early, before any windows or system tray icons are created
+  win_dark_mode::enable_process_dark_mode();
 
   setlocale(LC_ALL, "C");
 #endif
