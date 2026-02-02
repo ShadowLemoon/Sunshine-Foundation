@@ -193,9 +193,13 @@ export function useBackground(options = {}) {
     maxSizeMB = 2,
   } = options
 
-  const getCurrentBackground = () => localStorage.getItem(storageKey) ?? defaultBackground
+  const getCurrentBackground = () => localStorage.getItem(storageKey)
 
   const setBackground = async (imageUrl) => {
+    if (!imageUrl) {
+    document.body.style.background = ''
+    return
+    }
     document.body.style.background = `url(${imageUrl}) center/cover fixed no-repeat`
     if (isLocalImage(imageUrl)) {
       try {
