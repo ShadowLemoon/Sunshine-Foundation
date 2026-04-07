@@ -1287,6 +1287,8 @@ namespace config {
     config::sunshine.credentials_file = config::nvhttp.file_state;
     path_f(vars, "credentials_file", config::sunshine.credentials_file);
 
+    string_f(vars, "lan_bypass_auth", config::sunshine.lan_bypass_auth);
+
     string_f(vars, "external_ip", nvhttp.external_ip);
     list_string_f(vars, "resolutions"s, nvhttp.resolutions);
     list_string_f(vars, "fps"s, nvhttp.fps);

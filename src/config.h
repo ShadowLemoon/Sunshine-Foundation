@@ -236,6 +236,7 @@ namespace config {
     std::string username;
     std::string password;
     std::string salt;
+    std::string lan_bypass_auth;
 
     std::string config_file;
 

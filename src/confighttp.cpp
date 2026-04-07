@@ -200,6 +200,12 @@ namespace confighttp {
       return true;
     }
 
+    if (ip_type == net::LAN && !config::sunshine.lan_bypass_auth.empty() &&
+        config::sunshine.lan_bypass_auth == "IConfirmIAmOnASecureNetwork") {
+      BOOST_LOG(info) << "Web UI: ["sv << address << "] -- LAN bypass auth"sv;
+      return true;
+    }
+
     auto fg = util::fail_guard([&]() {
       send_unauthorized(response, request);
     });
