@@ -1,3 +1,4 @@
+import { getCurrentScope, onScopeDispose } from 'vue'
 import ColorThief from 'colorthief'
 
 const DEFAULT_BACKGROUND = 'https://assets.alkaidlab.com/sunshine-bg0.webp'
@@ -336,14 +337,22 @@ export function useBackground(options = {}) {
     observer.observe(document.documentElement, observerConfig)
     observer.observe(document.body, observerConfig)
 
+    if (getCurrentScope()) {
+      onScopeDispose(() => observer.disconnect())
+    }
+
     // 监听背景旁路切换
-    window.addEventListener('sunshine-background-bypass', (e) => {
+    const onBackgroundBypass = (e) => {
       if (e.detail?.enabled) {
         document.body.style.background = ''
       } else {
         loadBackground()
       }
-    })
+    }
+    window.addEventListener('sunshine-background-bypass', onBackgroundBypass)
+    if (getCurrentScope()) {
+      onScopeDispose(() => window.removeEventListener('sunshine-background-bypass', onBackgroundBypass))
+    }
   }
 
   return {

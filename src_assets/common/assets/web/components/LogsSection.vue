@@ -81,6 +81,22 @@ const DEV_TAP_THRESHOLD = 7
 const DEV_TAP_TIMEOUT = 3000
 const DEV_STORAGE_KEY = 'sunshine_dev_mode'
 
+const readDevMode = () => {
+  try {
+    return localStorage.getItem(DEV_STORAGE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+const writeDevMode = (enabled) => {
+  try {
+    localStorage.setItem(DEV_STORAGE_KEY, enabled ? '1' : '0')
+  } catch (e) {
+    console.warn('Persist dev mode failed:', e)
+  }
+}
+
 const props = defineProps({
   logFilter: {
     type: String,
@@ -171,7 +187,7 @@ const downloadLogs = async () => {
 }
 
 // Dev mode: 7 taps within 3 seconds
-const devMode = ref(localStorage.getItem(DEV_STORAGE_KEY) === '1')
+const devMode = ref(readDevMode())
 const devTapCount = ref(0)
 let devTapTimer = null
 
@@ -183,7 +199,7 @@ const handleDevTap = () => {
   if (devTapCount.value >= DEV_TAP_THRESHOLD) {
     devTapCount.value = 0
     devMode.value = !devMode.value
-    localStorage.setItem(DEV_STORAGE_KEY, devMode.value ? '1' : '0')
+    writeDevMode(devMode.value)
     // Dispatch event so other components can react
     window.dispatchEvent(new CustomEvent('sunshine-background-bypass', { detail: { enabled: devMode.value } }))
   }
