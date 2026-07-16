@@ -46,6 +46,9 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
+#include <sstream>
+#include <string>
 
 #include <Simple-Web-Server/server_https.hpp>
 
@@ -54,6 +57,52 @@ namespace clipboard_http {
   using resp_https_t = std::shared_ptr<typename SimpleWeb::ServerBase<SimpleWeb::HTTPS>::Response>;
   using req_https_t = std::shared_ptr<typename SimpleWeb::ServerBase<SimpleWeb::HTTPS>::Request>;
   using auth_fn = std::function<bool(resp_https_t, req_https_t)>;
+
+  struct blob_response_t {
+    SimpleWeb::StatusCode status;
+    std::string body;
+    SimpleWeb::CaseInsensitiveMultimap headers;
+  };
+
+  /// Build the HTTP response for POST /api/v1/clipboard/blob.
+  ///
+  /// The caller provides request headers and the raw body bytes. This helper is
+  /// transport-agnostic so Sunshine can expose the same blob store on multiple
+  /// HTTPS servers (e.g. confighttp for the local GUI agent and nvhttp for
+  /// paired Moonlight clients) without duplicating validation or storage logic.
+  blob_response_t make_blob_upload_response(
+    const SimpleWeb::CaseInsensitiveMultimap &request_headers,
+    const std::string &body);
+
+  /// Validate upload headers that must be checked before reading the request
+  /// body. Returns a response to send immediately when the request is rejected.
+  std::optional<blob_response_t> make_blob_upload_preflight_response(
+    const SimpleWeb::CaseInsensitiveMultimap &request_headers);
+
+  /// Build the HTTP response for GET /api/v1/clipboard/blob/<id>.
+  blob_response_t make_blob_get_response(const std::string &id);
+
+  /// End-to-end blob upload handler: runs preflight, reads body iff preflight
+  /// passes, then invokes `make_blob_upload_response`. Templated on the
+  /// request type so confighttp's `SimpleWeb::HTTPS` and nvhttp's bespoke
+  /// `SunshineHTTPS` Request types can share one definition.
+  template <typename Request>
+  inline blob_response_t process_blob_upload(const Request &req) {
+    if (auto out = make_blob_upload_preflight_response(req->header)) {
+      return *out;
+    }
+    std::stringstream ss;
+    ss << req->content.rdbuf();
+    return make_blob_upload_response(req->header, ss.str());
+  }
+
+  /// End-to-end blob fetch handler: extracts the id from `req->path_match[1]`
+  /// and invokes `make_blob_get_response`.
+  template <typename Request>
+  inline blob_response_t process_blob_get(const Request &req) {
+    const std::string id = req->path_match.size() >= 2 ? req->path_match[1].str() : std::string {};
+    return make_blob_get_response(id);
+  }
 
   /// Register the /api/v1/clipboard/* routes on `server`. `auth` is invoked
   /// at the start of every handler; it must return true for authorised

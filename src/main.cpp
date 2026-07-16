@@ -3,10 +3,14 @@
  * @brief Definitions for the main entry point for Sunshine.
  */
 // standard includes
+#include <atomic>
 #include <codecvt>
 #include <csignal>
 #include <fstream>
 #include <iostream>
+
+// lib includes
+#include <rs.h>
 
 // local includes
 #include "confighttp.h"
@@ -18,7 +22,7 @@
 #include "main.h"
 #include "nvhttp.h"
 #include "process.h"
-#include "system_tray.h"
+#include "tray/system_tray.h"
 #include "upnp.h"
 #include "version.h"
 #include "video.h"
@@ -28,9 +32,18 @@
   #include "platform/windows/win_dark_mode.h"
 #endif
 
-extern "C" {
-#include "rswrapper.h"
+#ifdef _WIN32
+  #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+  #endif
+  #include <windows.h>
+
+namespace {
+  // Captures the value main() ends up returning so the atexit terminator can use it.
+  // Defaults to 0 (success) for the common case where main returns lifetime::desired_exit_code.
+  std::atomic<int> g_final_exit_code { 0 };
 }
+#endif
 
 using namespace std::literals;
 
@@ -123,6 +136,15 @@ main(int argc, char *argv[]) {
   task_pool_util::TaskPool::task_id_t force_shutdown = nullptr;
 
 #ifdef _WIN32
+  // Note: this only fires on a normal `return` from main. If the program
+  // crashes mid-run (uncaught exception, AV, abort/terminate), atexit is
+  // not invoked, so the service supervisor still observes a non-zero exit
+  // code and can restart Sunshine as usual.
+  std::atexit([]() {
+    TerminateProcess(GetCurrentProcess(),
+                     static_cast<UINT>(g_final_exit_code.load(std::memory_order_acquire)));
+  });
+
   // Avoid searching the PATH in case a user has configured their system insecurely
   // by placing a user-writable directory in the system-wide PATH variable.
   SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_APPLICATION_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32);
@@ -397,6 +419,17 @@ main(int argc, char *argv[]) {
   std::thread configThread { confighttp::start };
   std::thread rtspThread { rtsp_stream::start };
 
+#if defined(_WIN32) && defined(SUNSHINE_GUI_TRAY) && SUNSHINE_GUI_TRAY >= 1
+  // The service wrapper owns user-session agent startup in service mode.
+  // Standalone and portable runs need to reconcile the same bundled agent here.
+  if (!platf::is_running_as_system()) {
+    const auto gui_agent_error = platf::launch_gui_agent();
+    if (gui_agent_error) {
+      BOOST_LOG(warning) << "Failed to launch bundled GUI agent: "sv << gui_agent_error.message();
+    }
+  }
+#endif
+
 #ifdef _WIN32
   // If we're using the default port and GameStream is enabled, warn the user
   if (config::sunshine.port == 47989 && is_gamestream_enabled()) {
@@ -423,7 +456,9 @@ main(int argc, char *argv[]) {
 
   mainThreadLoop(shutdown_event);
 
+#if defined SUNSHINE_TRAY && SUNSHINE_TRAY >= 1
   system_tray::end_tray();
+#endif
   try {
     display_device::session_t::get().restore_state();
   }
@@ -451,5 +486,12 @@ main(int argc, char *argv[]) {
   }
 #endif
 
+#ifdef _WIN32
+  // Hand the chosen exit code over to the atexit terminator so it can pass it
+  // straight to TerminateProcess. Without this the terminator would always
+  // exit with 0 even when lifetime::desired_exit_code was set non-zero by a
+  // failure path that still chose to return cleanly from main.
+  g_final_exit_code.store(lifetime::desired_exit_code, std::memory_order_release);
+#endif
   return lifetime::desired_exit_code;
 }

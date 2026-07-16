@@ -76,6 +76,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { apiFetch } from '../utils/apiFetch.js'
 
 const DEV_TAP_THRESHOLD = 7
 const DEV_TAP_TIMEOUT = 3000
@@ -154,7 +155,7 @@ const downloadLogs = async () => {
   // Tauri WebView2: fetch into memory then use Rust save_text_file command (dialog + fs write)
   if (window.__TAURI_INTERNALS__) {
     try {
-      const response = await fetch('/api/logs')
+      const response = await apiFetch('/api/logs')
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const content = await response.text()
       await window.__TAURI_INTERNALS__.invoke('save_text_file', {
